@@ -1,6 +1,5 @@
 # AI_EMAIL_SUMMAEIZER_AGENT
 Agentic AI Email Summarizer (n8n Workflow)  An Agentic AI-powered email automation workflow built in n8n.
-Here is a clean, professional **README.md** for your GitHub repository based on your workflow architecture (Gmail Trigger → Edit Fields → Basic LLM Chain → Groq Primary + Mistral Fallback → IF → Gmail Send → Google Sheets Logging).
 
 <img width="1528" height="483" alt="image" src="https://github.com/user-attachments/assets/1a9250ed-a180-4ac6-8fda-c4f968ed18e0" />
 
