@@ -1,0 +1,315 @@
+{
+  "name": "AI EMAIL SUMMAEIZER AGENT",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            },
+            {}
+          ]
+        },
+        "event": "=messageReceived",
+        "filters": {
+          "readStatus": "unread"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "cca37112-52ee-4f59-8934-995744cd37f0",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "S0q7y8woLUrLHMEG",
+          "name": "Gmail account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f14548ac-0378-4aae-bfef-26631af57cba",
+              "name": "Subject",
+              "value": "={{ $json.Subject }}",
+              "type": "string"
+            },
+            {
+              "id": "3e37d7b9-82c5-4ec3-87c8-83dd90fcd8fa",
+              "name": "From",
+              "value": "={{ $json.From }}",
+              "type": "string"
+            },
+            {
+              "id": "c4139fc4-7bb6-4fd5-84f1-56bb16a8a950",
+              "name": "Body",
+              "value": "={{ $json.snippet }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "39c4df6e-c982-4048-800c-c91cd94f75d9",
+      "name": "Edit Fields",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an eamil assistent to summarize the email.Summarize the following email and classify its importance.\n\nEmail:\n{{ $json.Body }}\nReturn EXACTLY in this format:\n\nSummary: <short summary>\nImportance: HIGH or MEDIUM or LOW\n {{ $json.Body }}",
+        "needsFallback": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are a professional administrative assistant. Your task is to analyze incoming emails and provide a clear, objective summary. Always identify the main action items and categorize the urgency as High, Medium, or Low. Keep your responses concise and professional."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        416,
+        0
+      ],
+      "id": "a3cc63a9-2b76-4afb-9745-41007c406bbc",
+      "name": "Basic LLM Chain",
+      "retryOnFail": true,
+      "waitBetweenTries": 2000,
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        352,
+        208
+      ],
+      "id": "effed6db-21fe-46ff-81e4-a560b0a3a70a",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "IkTnWCNnmh9l2weo",
+          "name": "Groq account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "16d37fe3-93cd-4322-8321-ea046454ed62",
+              "leftValue": "={{ $json.text.toLowerCase() }}",
+              "rightValue": "high",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        768,
+        0
+      ],
+      "id": "bc9ecff3-5fd2-4b81-a27b-3eecf06eac94",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "sendTo": "rohitgupta006@gmail.com",
+        "subject": "={{ $('Gmail Trigger').item.json.Subject }}",
+        "message": "={{ $('Gmail Trigger').item.json.snippet }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        976,
+        -32
+      ],
+      "id": "6170b9a6-3f2b-4bda-bca6-264d49bb48ec",
+      "name": "Send a message",
+      "webhookId": "80852e98-252d-4a55-a5e9-2ca377197f30",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "S0q7y8woLUrLHMEG",
+          "name": "Gmail account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "resource": "spreadsheet",
+        "title": "AI Summarizer",
+        "sheetsUi": {
+          "sheetValues": [
+            {
+              "title": "Sheet 1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        976,
+        160
+      ],
+      "id": "4cdf2e06-3f23-45cb-a649-abe5fb628782",
+      "name": "Create spreadsheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "S0hxDCbJyVRbx8NY",
+          "name": "Google Sheets account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "model": "ministral-8b-latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatMistralCloud",
+      "typeVersion": 1,
+      "position": [
+        560,
+        208
+      ],
+      "id": "bc0b786b-0ce1-4349-bad2-d46d8ee430dc",
+      "name": "Mistral Cloud Chat Model",
+      "credentials": {
+        "mistralCloudApi": {
+          "id": "HLQ6wCmEKjCCaWT4",
+          "name": "Mistral Cloud account"
+        }
+      },
+      "disabled": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create spreadsheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mistral Cloud Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "5bd9831d-094f-445e-b227-9dcdbe115974",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c06f74f32476657fd5efcfc62e7747215a75d76aba3a81160f8d4fd3595423a5"
+  },
+  "id": "6WKwn3BqTSbP6Mub",
+  "tags": []
+}
